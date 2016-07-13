@@ -1,10 +1,8 @@
 #!/usr/local/bin/python3
 
 import subprocess
-#import argparse
 import sys
 import re
-import unicodedata
 
 DEBUG = False
 
@@ -30,8 +28,6 @@ def get_man_descriptions(flag, man_page):
 
     relevant_lines = []
 
-    print(flags)
-
     for f in flags:
         flag_re = re.compile(flag_re_prefix + f)
         for counter, line in enumerate(man_page):
@@ -39,8 +35,7 @@ def get_man_descriptions(flag, man_page):
                 current_line = line
                 current_counter = counter
                 while current_counter < len(man_page) - 1:
-                    current_counter += 1;
-                    # TODO: This match does not work.
+                    current_counter += 1
                     if not re.match("\W*", man_page[current_counter]):
                         current_line += "\n" + man_page[current_counter]
 
@@ -52,14 +47,8 @@ def get_man_descriptions(flag, man_page):
 
 if __name__ == '__main__':
 
-    '''
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command_with_flags", help="The command, complete with all flags you want explained")
-    args = parser.parse_args()
-    '''
-
     # Perhaps first scrub input for security? Whitelisted commands?
-    # Add a check to see if it requires sudo
+    # Add a check to see if it requires sudo?
 
     if DEBUG:
         print(sys.argv)
@@ -69,11 +58,11 @@ if __name__ == '__main__':
 
     # TODO: figure out encoding from command line
     # Run `man _command_` and capture output
-    # Split output on newlines
-    # Scan each line for a match flag at the beginning
-    man_page = subprocess.check_output(["man", command]).decode("utf-8").split("\n")
+    # Split output on double newlines to separate paragraphs
+    man_page = subprocess.check_output(["man", command]).decode("utf-8").split("\n\n")
 
-    # Go through each flag/argument and search each line for it.
+    # Go through each flag/argument and find each line of the man page that
+    # contains it.
     for flag in flags:
         print(flag)
         man_descriptions = get_man_descriptions(flag, man_page)
@@ -81,4 +70,4 @@ if __name__ == '__main__':
             for m in man_descriptions:
                 print(m)
         else:
-            print(0)
+            print("No valid flags detected")
